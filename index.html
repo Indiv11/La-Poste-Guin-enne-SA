@@ -81,6 +81,14 @@
             padding: 15px 0;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        /* Nouveau style pour les notifications */
+        .notification-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+            min-width: 300px;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -312,18 +320,21 @@
             </div>
         </div>
 
-        <!-- Universal QR Code -->
+        <!-- QR Code d'accès à la plateforme -->
         <div class="card shadow">
             <div class="card-body text-center">
-                <h5><i class="bi bi-qr-code"></i> QR Code Universel</h5>
-                <p>Scanner pour accéder à cette plateforme</p>
+                <h5><i class="bi bi-qr-code"></i> Accès Rapide</h5>
+                <p>Scanner ce code pour accéder directement à la plateforme</p>
                 <div class="qr-code-container mb-3 mx-auto">
-                    <img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://laposte.gn/tracking" 
-                         alt="Universal QR Code" class="img-fluid">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://indiv11.github.io/La-Poste-Guin-enne-SA/" 
+                         alt="QR Code d'accès" class="img-fluid">
                 </div>
-                <button class="btn btn-outline-secondary btn-sm" id="printQRBtn">
-                    <i class="bi bi-printer"></i> Imprimer
-                </button>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" value="https://indiv11.github.io/La-Poste-Guin-enne-SA/" id="platformLink" readonly>
+                    <button class="btn btn-guinea" onclick="copyPlatformLink()">
+                        <i class="bi bi-clipboard"></i> Copier
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -341,6 +352,29 @@
         localStorage.setItem('packages', JSON.stringify([]));
     }
 
+    // Fonction pour afficher les notifications
+    function showNotification(message, type = 'success') {
+        const toastContainer = document.createElement('div');
+        toastContainer.innerHTML = `
+            <div class="toast notification-toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-${type} text-white">
+                    <strong class="me-auto">La Poste Guinéenne</strong>
+                    <small>Maintenant</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(toastContainer);
+        
+        // Fermeture automatique après 5 secondes
+        setTimeout(() => {
+            toastContainer.remove();
+        }, 5000);
+    }
+
     // Form submission handler
     document.getElementById('packageForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -348,6 +382,9 @@
         // Generate tracking ID
         const packages = JSON.parse(localStorage.getItem('packages'));
         const trackingId = 'PGN-' + (1000 + packages.length + 1);
+        
+        // Récupérer le point relais sélectionné
+        const relayPoint = document.getElementById('relayPoint').value;
         
         // Create package object
         const newPackage = {
@@ -358,7 +395,7 @@
             phoneNumber: document.getElementById('phoneNumber').value,
             emailAddress: document.getElementById('emailAddress').value,
             serviceType: document.getElementById('serviceType').value,
-            relayPoint: document.getElementById('relayPoint').value,
+            relayPoint: relayPoint,
             packageDescription: document.getElementById('packageDescription').value,
             emailNotification: document.getElementById('emailNotification').checked,
             smsNotification: document.getElementById('smsNotification').checked,
@@ -385,8 +422,28 @@
         // Reset form
         this.reset();
         
-        // Show success message
-        alert(`Votre demande a été enregistrée!\nVotre numéro de suivi: ${trackingId}`);
+        // Notification pour l'utilisateur
+        const notificationMessage = `
+            <strong>Votre demande a été enregistrée avec succès!</strong><br>
+            Numéro de suivi: <strong>${trackingId}</strong><br>
+            Statut: <span class="badge bg-info">En traitement</span><br><br>
+            <small>Vous serez contacté par un agent du point relais <strong>${relayPoint}</strong> sous 24h.</small>
+        `;
+        
+        showNotification(notificationMessage, 'success');
+        
+        // Simulation d'une notification SMS/Email
+        if (newPackage.smsNotification) {
+            setTimeout(() => {
+                showNotification(`SMS envoyé au ${newPackage.phoneNumber}: Votre colis ${trackingId} est enregistré.`, 'info');
+            }, 1500);
+        }
+        
+        if (newPackage.emailNotification) {
+            setTimeout(() => {
+                showNotification(`Email envoyé à ${newPackage.emailAddress} avec les détails de votre envoi.`, 'info');
+            }, 3000);
+        }
     });
 
     // Track package button
@@ -402,7 +459,7 @@
             document.getElementById('trackingResults').style.display = 'block';
             bootstrap.Modal.getInstance(document.getElementById('trackingModal')).hide();
         } else {
-            alert("Aucun colis trouvé avec ce numéro de suivi.");
+            showNotification("Aucun colis trouvé avec ce numéro de suivi.", "danger");
         }
     });
 
@@ -456,20 +513,21 @@
         document.body.removeChild(link);
     });
 
-    // Print universal QR code
-    document.getElementById('printQRBtn').addEventListener('click', function() {
-        window.print();
-    });
+    // Copy platform link
+    function copyPlatformLink() {
+        const linkInput = document.getElementById('platformLink');
+        linkInput.select();
+        document.execCommand('copy');
+        showNotification('Lien copié dans le presse-papiers !', 'info');
+    }
 
     // Simulate QR code scanning
     document.getElementById('scanQRBtn').addEventListener('click', function() {
-        // In a real app, this would use a QR scanner API
-        // For demo, we'll use a sample package
         const packages = JSON.parse(localStorage.getItem('packages'));
         if (packages.length > 0) {
             document.getElementById('trackingNumberInput').value = packages[0].trackingId;
         } else {
-            alert("Aucun colis enregistré pour le moment. Veuillez d'abord soumettre une demande.");
+            showNotification("Aucun colis enregistré pour le moment. Veuillez d'abord soumettre une demande.", "warning");
         }
     });
     </script>
