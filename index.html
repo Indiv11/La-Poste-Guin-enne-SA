@@ -375,6 +375,29 @@
         }, 5000);
     }
 
+    // Fonction pour envoyer les données à Google Sheets
+    function sendToGoogleSheet(formData) {
+        const scriptURL = 'https://script.google.com/macros/s/AKfycby4YGPovdluKJbWZya8-8Dhvkg4vUiY-cyl9rHbApLLexz6mX_XDF9F1K3tRo9N5ICq/exec';
+        
+        fetch(scriptURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Données envoyées avec succès à Google Sheets");
+            } else {
+                console.error("Erreur lors de l'envoi à Google Sheets");
+            }
+        })
+        .catch(error => {
+            console.error("Erreur fetch :", error);
+        });
+    }
+
     // Form submission handler
     document.getElementById('packageForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -411,6 +434,18 @@
         // Save to localStorage
         packages.push(newPackage);
         localStorage.setItem('packages', JSON.stringify(packages));
+        
+        // Envoyer les données à Google Sheets
+        const formData = {
+            nom: document.getElementById('fullName').value,
+            telephone: document.getElementById('phoneNumber').value,
+            email: document.getElementById('emailAddress').value,
+            adresse: document.getElementById('physicalAddress').value,
+            service: document.getElementById('serviceType').value,
+            pointRelais: relayPoint,
+            numeroSuivi: trackingId
+        };
+        sendToGoogleSheet(formData);
         
         // Display tracking info
         displayTrackingInfo(newPackage);
