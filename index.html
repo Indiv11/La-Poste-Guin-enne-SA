@@ -458,8 +458,8 @@
         // Envoyer l'email de confirmation via EmailJS
         if (newPackage.emailNotification) {
             emailjs.send("lapsoste.gn", "template_dwxzunr", {
-                Title: newPackage.emailAddress,
-                email: newPackage.fullName,
+                title: newPackage.emailAddress,
+                name: newPackage.fullName,
                 client_phone: newPackage.phoneNumber,
                 tracking_id: trackingId
             })
