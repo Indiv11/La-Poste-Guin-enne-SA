@@ -346,6 +346,14 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Intégration de EmailJS -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+      (function() {
+        emailjs.init("uWgScZkh8vniLBLUp"); // Clé publique EmailJS
+      })();
+    </script>
+
     <script>
     // Store packages in localStorage
     if (!localStorage.getItem('packages')) {
@@ -447,6 +455,23 @@
         };
         sendToGoogleSheet(formData);
         
+        // Envoyer l'email de confirmation via EmailJS
+        if (newPackage.emailNotification) {
+            emailjs.send("lapsoste.gn", "template_9gdeao9", {
+                to_email: newPackage.emailAddress,
+                client_name: newPackage.fullName,
+                client_phone: newPackage.phoneNumber,
+                tracking_id: trackingId
+            })
+            .then(() => {
+                showNotification("E-mail de confirmation envoyé avec succès !", "success");
+            })
+            .catch(err => {
+                console.error("Erreur EmailJS :", err);
+                showNotification("Erreur lors de l'envoi de l'e-mail de confirmation.", "warning");
+            });
+        }
+        
         // Display tracking info
         displayTrackingInfo(newPackage);
         
@@ -472,12 +497,6 @@
             setTimeout(() => {
                 showNotification(`SMS envoyé au ${newPackage.phoneNumber}: Votre colis ${trackingId} est enregistré.`, 'info');
             }, 1500);
-        }
-        
-        if (newPackage.emailNotification) {
-            setTimeout(() => {
-                showNotification(`Email envoyé à ${newPackage.emailAddress} avec les détails de votre envoi.`, 'info');
-            }, 3000);
         }
     });
 
