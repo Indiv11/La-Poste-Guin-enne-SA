@@ -284,7 +284,7 @@
                     <div class="col-md-4 text-center">
                         <p class="fw-bold">QR Code de Suivi</p>
                         <div class="qr-code-container mb-3">
-                            <img id="trackingQRCode" src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://tracking.laposte.gn?id=PGN-0125" 
+                            <img id="trackingQRCode" src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://inscription-pointrelais.laposte.gn/tracking?id=PGN-0125" 
                                  alt="QR Code" class="img-fluid">
                         </div>
                         <button class="btn btn-outline-secondary btn-sm" id="downloadQRBtn">
@@ -330,7 +330,7 @@
                          alt="QR Code d'accès" class="img-fluid">
                 </div>
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" value="https://indiv11.github.io/La-Poste-Guin-enne-SA/" id="platformLink" readonly>
+                    <input type="text" class="form-control" value="https://inscription-pointrelais.laposte.gn/" id="platformLink" readonly>
                     <button class="btn btn-guinea" onclick="copyPlatformLink()">
                         <i class="bi bi-clipboard"></i> Copier
                     </button>
@@ -544,7 +544,7 @@
         
         // Update QR code
         document.getElementById('trackingQRCode').src = 
-            `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://tracking.laposte.gn?id=${pkg.trackingId}`;
+            `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://inscription-pointrelais.laposte.gn/tracking?id=${pkg.trackingId}`;
         
         // Update timeline
         if (pkg.statusHistory && pkg.statusHistory.length > 0) {
